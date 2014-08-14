@@ -1,0 +1,179 @@
+                 PGPLOT 5.2.0  for  Windows95/WindowsNT
+ and either MS PowerStation Fortran 4.0  or  Digital Visual Fortran 5.0
+                      P. A. Seeger, June 22, 1998
+                       e-mail:  PASeeger@aol.com
+                     (Based on C. T. Dum, May 1995)
+
+The following notes describe the porting of Tim Pearson's PGPLOT 5.2.0
+to Microsoft Windows95 (or WindowsNT), using Microsoft PowerStation 
+Fortran 4.0 or Digital Visual Fortran 5.0.  This 32-bit operating system 
+is easy to use, but most importantly removes the severe memory restrictions 
+of DOS.  The size of applications which can be linked with PGPLOT.LIB is 
+limited only by total physical and virtual memory.  The graphics libraries
+MSFLIB (Microsoft) or DFLIB (Digital) also include many additional (system) 
+functions known from C.  Even for an old-fashioned command-line Fortran 
+programer (like PAS), it is relatively easy to add features like dialog 
+boxes and custom menus.
+
+Once PGPLOT.LIB is built, applications are most easily compiled using 
+the Microsoft Developer Studio.  The application type must be "QuickWin",
+or it must be compiled with command line option "/MW".  Programs execute 
+in a text window, with the graphical output in up to 8 separate child 
+windows.  Cursor functions (including rubber-band modes) are implemented 
+by moving the mouse and typing a keyboard key. 
+NOTE: applications developed in these Fortrans will NOT execute under 
+      DOS or Windows 3.x (no, not even with WIN32s installed).
+
+The steps in building PGPLOT.LIB are the following: 
+
+1. Download PGPLOT 5.2.0 by your favorite method.  I decompressed ver. 
+   5.0.3 on VAX-VMS system, and ver. 5.1.beta from a Unix machine 
+   ("uncompress" followed by "tar -xcf").  But I have now acquired
+   WinZip (Nico Mak Computing, Inc., www.winzip.com) which performs Gunzip 
+   and tar in the PC (very good program - I even sent them the $29 fee!).
+   Just make the file name "PGPLOT52.TGZ" and open it in WinZip.
+
+2. Create an appropriate subdirectory structure; e.g.
+     x:\PGPLOT
+              \SRC
+              \SYS_WIN
+              \DRIVERS
+              \FONTS
+              \EXAMPLES
+   where x: is either C: or another hard disk in your system.  Extract 
+   files from the corresponding subdirectories of the downloaded .TGZ file.  
+   Note: The copy of GRGFIL.F from the \SRC folder must be omitted in favor
+   of the copy in \SYS_WIN to get an appropriate default directory.
+   (Personal preference note: I also copy \APPLICAT\PLOT10\PLOT10.F into 
+   the \SRC subdirectory.)  
+
+   The files in \SYS_WIN should include
+      AAAREAD.ME   (this file)
+      AAAREAD.ME2  (information for C programmers)
+      GIDRIV.F     (Fortran90 version of GIF driver, without "C" calls)
+      GRDOS.F
+      GREXEC.F
+      GRGFIL.F     (replace the version in \SRC)
+      GRSY00.F     (not system dependent)
+      PGBIND.MAK   (see AAAREAD.ME2 for discussion)
+      W9DRIV.F     (the driver itself, with attached subroutines)
+
+   The file W9DRIV.F as included is appropriate for Digital.  To convert
+   to Microsoft, replace the fourth line
+      USE DFLIB
+   with
+      USE MSFLIB
+   This same change must be made in subroutines GRW900 and GRW901.
+
+3. If you did not use C: in step 2, create a directory C:\PGPLOT and copy
+   RGB.TXT to it from x:\PGPLOT.  You also need to compile and execute the 
+   program PGPACK from subdirectory x:\PGPLOT\FONTS to convert file 
+   GRFONT.TXT to binary file GRFONT.DAT.  To run PGPACK in the Windows
+   environment, put this statement before the READs:
+         OPEN (5, FILE='x:\pgplot\fonts\grfont.txt')
+   Likewise the OPEN statement for the output can be modified:
+         OPEN (2, FILE='c:\pgplot\grfont.dat')
+   The output file is different for Microsoft and Digital.  (The 
+   directory with these two files can be elsewhere if identified by
+   environment variable PGPLOT_DIR, or the full [path]filenames can be
+   given in environment variables PGPLOT_RGB and PGPLOT_FONT.)
+
+4. In the Developer Studio, in the File/New menu, Create a new Project 
+   Workspace of Type "Static Library", Name PGPLOT, Location 
+   x:\MSDEV\PROJECTS\  (Microsoft)  or  
+   x:\Program Files\DevStudio\MyProjects\  (Digital).
+   Use the Insert/"Files into Project..." or
+           Project/Add to Project/Files...
+   and the search box to associate the following files with the project:
+      x:\PGPLOT\SRC\*.F
+      x:\PGPLOT\SYS_WIN\*.F
+      x:\PGPLOT\DRIVERS\LXDRIV.F,NUDRIV.F,PSDRIV.F
+   (The dependent *.INC files will be included automatically.)
+
+5. Build the project.  From the Build menu, choose "Build PGPLOT.LIB".  
+   The default compiler options are suitable; in particular, the Debug 
+   configuration is not optimized, but the Release configuration uses
+   full optimization.  (If the choice of "Release" is not apparent, use 
+   Build/Set Active Configuration...)  Expect 7 Warning messages with 
+   Microsoft, or 2 with Digital.  When both Debug and Release have 
+   successfully  completed, I like to copy the Release version of the 
+   library from x:\MSDEV\PROJECTS\PGPLOT\RELEASE to 
+   x:\MSDEV\LIB (Microsoft), or from
+   x:\Program Files\DevStudio\MyProjects\PGPLOT\RELEASE to
+   x:\Program Files\DevStudio\DF\LIB (Digital),
+   where subsequent applications can find it more easily.  
+
+6. Run the examples.  In the same Project Workspace, use File/New and the
+   Projects tab (or if using Microsoft, Insert/Project...) to create a
+   "QuickWin Application", Name EXAMPLES.  Then use Project/Dependencies
+   (or if using Microsoft, Build/Subprojects...) to specify that PGPLOT is
+   a subproject of EXAMPLES.  One at a time, use Project/Add to Project/
+   Files... (or if using Microsoft, Insert/Files into Project...) to select
+   a file from x:\PGPLOT\EXAMPLES.  (The previous file may be deleted from
+   the FileView window when successfully completed.)  From the Build menu,
+   choose "Execute EXAMPLES.EXE".  The first page of the first test 
+   (PGDEMO1.F) should be a parabola.  If there is no text on the plot, 
+   then you have not successfully created or located the file GRFONT.DAT 
+   (see step 3 above).  If windows are created but neither graphics nor 
+   text appear, the problem may be that the display is set to a mode which
+   doesn't use the VGA color registers; decrease the color palette to 256
+   colors.  You may delete all of the PGPLOT folders from  
+   x:\Program Files\DevStudio\MyProjects\  or from
+   x:\MSDEV\PROJECTS after successfully testing the library.
+
+7. Drivers for Windows95/NT, PostScript, GIF, LaTeX, and the Null driver
+   are included by default. If you add additional drivers (which may require 
+   debugging to eliminate perceived syntax errors etc.) to the library, 
+   then the CASE structure in subroutine GREXEC.F must also be modified to
+   reflect the changes; also, NDEV must reflect the total number of 
+   drivers.  The default graphic window size for device type "/W9" is
+   800*600 with 236 colors (SVGA); 20 colors are reserved for system use.
+   The default can be changed by setting an environment variable (either in
+   AUTOEXEC.BAT, or from a command line before starting the application) as
+   follows: 
+      SET PGPLOT_VIDEO=VGA  (or V),   640 * 480
+                       SVGA (or S),   800 * 600
+                       XGA  (or X),  1024 * 768
+                       ZGA  (or Z),  1280 * 1024
+   Modes may also be selected by using alternate device types
+   "/WV", "/WS", "/WX", or "/WZ".  Modes exceeding the capability of your
+   Windows screen driver will be reduced to the maximum available.  For
+   an example of the 236-color modes, see PGDEMO4.  For an example of
+   different resolutions, try using "Menu/WV" for the first window and
+   "Graphs/WX" for the second window in PGDEMO13.  (Note the use of the 
+   device specification to name the window.)
+
+8. The cursor is emulated by an interrupt driven mouse routine (see
+   GRW901 in file W9DRIV.F).  The cursor moves continuously whenever
+   the window is selected, but the position is not returned to the
+   calling program until a key has been struck, and the character is
+   also returned.  Control then returns to the "text" window for any
+   additional input or processing.  If you lose track, there is a status 
+   message at the bottom of the frame window which tells you which 
+   window is waiting for input (except, see Note in previous section).
+   The color of the cursor may be dim against some backgrounds 
+   (especially green in the default palette), but you can usually see it
+   at the tip of the mouse arrow while you move it around.  You might 
+   try using PGBAND mode 7 for the cursor to improve visibility.  See 
+   especially programs PGDEMO5 and PGDEMO6.
+
+9. Plots can be clipped and copied to other applications, such as Word.
+   Unfortunately, black is black and white is white, so printing uses a
+   lot of ink and the white lines tend to disappear.  One option is to 
+   exchange palette colors 0 and 1 in PGPLOT with 
+      CALL PGSCR(0, 1., 1., 1.)    !black becomes white
+      CALL PGSCR(1, 0., 0., 0.)    !white becomes black
+   before making the version to be printed; another is to cut and paste 
+   to a utility (I use Paint-Shop-Pro) in which you can adjust the color 
+   palette; and a third way is to specify either the "filename.ps/PS" or 
+   "filename.gif/GI" device and write a file.  (Note: this might be a 
+   good use for a custom menu entry in your application.)  Yet another 
+   option is to create a second device window and change the color 
+   palette only in that window.  (See PGDEMO13 for an example of multiple 
+   simultaneous windows.)
+
+10. Finally, this port has been thoroughly tested (starting with earlier
+   versions of PGPLOT, and using the Microsoft compiler), but no 
+   responsibility for any damages is accepted (by either [PAS], [CTD], 
+   or even [TJP])!  User input concerning "features" of the driver or
+   this document is welcomed.

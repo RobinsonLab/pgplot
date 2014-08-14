@@ -1,0 +1,22 @@
+Working Directory `c:\CODE'
+C:\LF9550\BIN\LF95.EXE "c:\code\diffuse.f95" -winconsole
+Lahey/Fujitsu Fortran 95 Compiler Release 5.00f  S/N: F9364182Z
+Copyright (C) 1994-1998 Lahey Computer Systems.  All rights reserved.
+Copyright (C) 1998 FUJITSU LIMITED. All rights reserved.
+Registered to:  Welch Group
+
+Options:
+-nc            -nchk          -co            -dal           -ndbl
+-ndll          -nf95          -nfix          -ng            -nin
+-ninfo         -nlst          -nlong         -maxfatals 50  -nml
+-o1            -no            -out c:\code\diffuse.exe      -nquad
+-nsav          -nstaticlink   -stchk         -nswm          -tp
+-ntrace        -ntrap         -nvsw          -w             -winconsole
+-nwisk         -nwo           -nxref
+
+Compiling file c:\code\diffuse.f95.
+Compiling program unit diffuse at line 1:
+Compiling program unit gaussian at line 36:
+386|LINK: 9.2 -- Copyright (C) 1986-98 Phar Lap Software, Inc.
+
+DOS Task Finished
