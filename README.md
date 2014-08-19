@@ -1,4 +1,4 @@
 pgplot
 ======
 
-plotting library
+plotting library. Used by GlobalCurve program.
